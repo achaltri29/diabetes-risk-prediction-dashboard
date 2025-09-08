@@ -27,7 +27,7 @@ from dashboard_utils import (
 # Page Configuration (FIXED)
 # ------------------------------
 st.set_page_config(
-    page_title="AI-Driven Patient Deterioration Risk Dashboard",
+    page_title="Diabetes Risk Prediction Dashboard",
     layout="wide",
 )
 
