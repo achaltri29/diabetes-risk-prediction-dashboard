@@ -2,12 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.DS_Store/
 # Virtual environment
 venv/
-
-# Ignore image files
-image/
-
-# Ignore CSV files
-*.csv
+tempCodeRunnerFile.py
+*.txt
