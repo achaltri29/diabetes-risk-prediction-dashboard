@@ -1,3 +1,7 @@
+# Adds various statistical features per patient to the dataset
+# Saves the resulting dataset to 'images/patient_features_with_outcome.csv'
+
+
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression

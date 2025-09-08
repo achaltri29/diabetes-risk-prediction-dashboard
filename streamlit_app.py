@@ -142,7 +142,7 @@ filtered_df = filter_cohort(
 # MAIN PAGE: COHORT DASHBOARD VIEW
 # ==================================================================================================
 if menu == "Cohort Dashboard":
-    tab1, tab2 = st.tabs(["📈 Cohort Overview", "🧑‍⚕️ Patient Detail View"])
+    tab1, tab2 = st.tabs(["Cohort Overview", "Patient Detail View"])
 
     with tab1:
         st.subheader(f"Cohort Overview ({len(filtered_df)} Patients Shown)")
@@ -197,6 +197,10 @@ if menu == "Cohort Dashboard":
                  st.error(f"**High Risk Alert:** This patient has a **{format_percent(prob)}** predicted risk of deterioration.")
             st.markdown("---")
 
+            st.markdown("##### Patient Details")
+            st.write(prow.T)
+            st.markdown("---")
+
 
             st.markdown("##### Daily Glucose Trend")
             fig = plot_daily_glucose(glucose_df, selected_ptid)
@@ -236,11 +240,11 @@ if menu == "Model Performance":
 
         p_cols2 = st.columns(2)
         with p_cols2[0]:
-             if os.path.exists("./precision_recall_curve.png"):
+             if os.path.exists("./image/precision_recall_curve.png"):
                 st.markdown("##### Precision-Recall Curve")
-                st.image("./precision_recall_curve.png")
+                st.image("./image/precision_recall_curve.png")
         with p_cols2[1]:
-            if os.path.exists("./calibration_curve.png"):
+            if os.path.exists("./image/calibration_curve.png"):
                 st.markdown("##### Model Calibration Curve")
-                st.image("./calibration_curve.png")
+                st.image("./image/calibration_curve.png")
 
