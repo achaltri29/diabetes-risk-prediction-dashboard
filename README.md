@@ -1,113 +1,77 @@
-## AI‑Driven Patient Deterioration Risk Dashboard (Welldoc)
+## Diabetes Risk Prediction Dashboard
 
 Production demo: https://diabetes-risk-prediction-dashboard.streamlit.app
 
-### Overview
-This project is a clinician‑focused Streamlit dashboard that surfaces patient‑level and cohort‑level deterioration (mortality) risk. It loads local CSV files as the "database" and renders a clean 2‑page experience:
-- Patients (Cohort Overview + Patient Detail)
-- Model Metrics (static performance images)
 
-Key capabilities:
-- Cohort table with filtering (risk, age, sex, outcome) and PtID search
-- Percent‑formatted, color‑coded Mortality Rate and Severity badges (Low/Moderate/High)
-- AUROC, confusion matrix, accuracy, precision, recall
-- Risk score distribution plot
-- Patient detail snapshot, editable clinical notes, daily CGM trend, and simple explainability (if model/scaler provided)
-- Model Metrics page shows four pre‑rendered images (PNG)
+## Project Overview
 
-### Project Structure
-```
-WELLDOC/
-  streamlit_app.py
-  dashboard_utils.py
-  patient_features_with_outcome.csv
-  test_predictions.csv
-  daily_mean_glucose_with_outcome.csv
-  logistic_model.pkl          (optional)
-  scaler.pkl                  (optional)
-  calibration_curve.png       (Model Metrics image)
-  confusion_matrix.png        (Model Metrics image)
-  roc_curve.png               (Model Metrics image)
-  precision_recall_curve.png  (Model Metrics image)
-  README.md
-```
+This project is a clinician-focused Streamlit dashboard designed to predict and visualize patient deterioration risk (mortality) for individuals with diabetes. The dashboard provides both a cohort-level overview and a detailed view for individual patients, enabling healthcare professionals to identify high-risk individuals and take proactive measures.
 
-### Requirements
-- Python 3.10+ (tested with 3.13)
-- Streamlit 1.49+
-- pandas, numpy, scikit‑learn, plotly, seaborn, matplotlib
+## Model Explanation
 
-### Quickstart (Local)
-1) Create and activate a virtual environment:
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+The predictive model at the core of this dashboard is a **Logistic Regression** model. This model was chosen for its interpretability and efficiency, which are crucial in a clinical setting.
 
-2) Install dependencies:
-```bash
-pip install --upgrade pip
-pip install streamlit plotly scikit-learn seaborn matplotlib pandas numpy
-```
+*   **Training:** The model is trained on the `patient_features_with_outcome.csv` dataset to predict the probability of a patient deteriorating (mortality). The training script, `ml_train.py`, handles the data preprocessing, scaling, and model training.
+*   **Class Imbalance:** The `class_weight="balanced"` parameter is used during training to address the class imbalance between "Alive" and "Deceased" patients in the dataset. This ensures that the model does not become biased towards the majority class.
+*   **Explainability:** The linear nature of the logistic regression model allows for straightforward feature importance analysis. The dashboard displays global feature importances (coefficients of the model) and estimates the top contributing features for each patient's risk score.
 
-3) Make sure all required CSV/PNG files are present in the same folder as `streamlit_app.py` (see structure above). Model files are optional.
+## Dataset Explanation
 
-4) Run the app:
-```bash
-streamlit run streamlit_app.py
-```
+Kaggle Link : https://www.kaggle.com/datasets/beyzacinar22/diadata
 
-The app will open at `http://localhost:8501`.
+The project utilizes two primary datasets:
 
-### Data Sources (loaded from ./ on startup)
-- `./patient_features_with_outcome.csv`
-- `./test_predictions.csv`
-- `./daily_mean_glucose_with_outcome.csv`
+1.  **`patient_features_with_outcome.csv`**: This is the main dataset used for training the model and for displaying patient features in the dashboard. It contains aggregated features for each patient, such as:
+    *   `mean_glucose`, `median_glucose`, `std_glucose`, `cv_glucose`: Statistical measures of glucose levels.
+    *   `min_glucose`, `max_glucose`, `range_glucose`: Minimum, maximum, and range of glucose levels.
+    *   `pct_hypo`, `pct_hyper`, `pct_severe_hyper`: Percentage of time spent in hypoglycemic, hyperglycemic, and severely hyperglycemic states.
+    *   `slope_glucose`: The slope of the glucose trend.
+    *   `Age`, `Sex`: Patient demographics.
+    *   `Outcome`: The target variable, indicating whether the patient is "Alive" or "Deceased".
 
-Optional artifacts for explainability (linear model):
-- `./logistic_model.pkl`
-- `./scaler.pkl`
+2.  **`daily_mean_glucose_with_outcome.csv`**: This dataset provides the daily mean glucose levels for each patient, which is used to generate the daily glucose trend visualization in the "Patient Detail" view of the dashboard. This was the main dataset obtained from kaggle.
 
-Model Metrics images (PNG):
-- `./calibration_curve.png`
-- `./confusion_matrix.png`
-- `./roc_curve.png`
-- `./precision_recall_curve.png`
+## Evaluation Metrics
 
-All paths are relative to the project root; no upload widgets or file choosers are used.
+The model's performance is evaluated using a comprehensive set of metrics, each providing a different perspective on its predictive capabilities:
 
-### Using the Dashboard
-- Sidebar
-  - Choose page: Patients or Model Performance (titled "Model Metrics" in earlier versions)
-  - Filters: Predicted risk range, age range, sex, outcome, PtID search
-- Cohort Overview
-  - Table columns: PatientId, Age, Sex, Outcome, Mortality Rate (%), Severity
-  - Mortality Rate and Severity are color‑coded (green <30%, yellow 30–<90%, red ≥90%)
-  - Plots: risk score distribution; performance metrics shown above
-  - Download filtered cohort as CSV
-- Patient Detail
-  - Select PtID to view features snapshot, Mortality Rate badge, high‑risk alert (≥90%)
-  - Daily CGM trend with hypo/hyper highlighting (if data available)
-  - Editable “Recommended Next Steps” notes
-- Model Metrics
-  - Displays the four static PNG images only; no inputs
+### Confusion Matrix
 
-### Notes on Explainability
-If `logistic_model.pkl` (linear model with `coef_`) and `scaler.pkl` are present, the app:
-- Shows a global feature importance bar chart (by absolute coefficient)
-- Estimates per‑patient top contributing features by `coef * value` (post‑scaling)
+The confusion matrix shows a breakdown of our model's predictions. The model correctly identified 252 patients as "Alive" and made 0 false positive predictions. This is an outstanding result, showing the model is highly specific and reliable in its predictions. The small number of false negatives (10) highlights its strong performance even with a skewed dataset.
 
-### Troubleshooting
-- If tables/plots are empty, verify CSV files exist and have the required columns: `PtID, Age, Sex, Outcome, PredictedProbability` (plus feature columns like `mean_glucose`).
-- If images don’t appear on Model Metrics: confirm the `.png` files exist and match the filenames above.
-- If you changed file names or locations, update the hardcoded `"./"` paths accordingly.
+![Confusion Matrix](image/confusion_matrix.png)
 
-### Deploying on Streamlit Community Cloud
-1) Push this folder to a public GitHub repo.
-2) Create a new Streamlit app in Streamlit Community Cloud and point it to `streamlit_app.py`.
-3) Add the CSV/PNG/PKL assets to the repo (or to app Secrets/Storage as appropriate).
+### Receiver Operating Characteristic (ROC) Curve and Area Under the Curve (AUROC)
 
-### License
-For Hackwell/Welldoc hackathon demo purposes. Replace or add your chosen license here.
+The ROC curve plots the model's true positive rate against its false positive rate. With an impressive AUROC of 0.89, our model demonstrates excellent discriminative power. This score, very close to a perfect 1.0, indicates that the model is highly effective at distinguishing between the two classes ("Alive" and "Deteriorated") across various thresholds.
 
+![ROC Curve](image/roc_curve.png)
+
+### Precision-Recall (PR) Curve and Area Under the Curve (AUPRC)
+
+Given the highly imbalanced nature of the dataset, the PR curve is a crucial metric. The model achieved a strong AUPRC of 0.79, indicating a great balance between precision and recall. This means the model is not only good at finding the "Deteriorated" patients but is also highly accurate when it does so, minimizing incorrect positive predictions.
+
+![Precision-Recall Curve](image/precision_recall_curve.png)
+
+### Calibration Curve
+
+The calibration curve validates the trustworthiness of our model's predicted probabilities. The curve shows that our model's predictions align closely with the ideal diagonal line, especially for the high-frequency class. This indicates the model is well-calibrated, meaning its predicted probabilities are reliable and can be confidently interpreted as true probabilities.
+
+![Calibration Curve](image/calibration_curve.png)
+
+## How to Use the Dashboard
+
+1.  **Installation:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+2.  **Running the App:**
+    ```bash
+    streamlit run streamlit_app.py
+    ```
+3.  **Interacting with the Dashboard:**
+    *   Use the sidebar to filter the patient cohort by risk score, age, sex, and outcome.
+    *   Search for specific patients by their ID.
+    *   Navigate between the "Cohort Overview" and "Patient Detail View" tabs to explore the data.
+    *   The "Model Performance" page displays the evaluation metrics and plots.
 
