@@ -23,24 +23,16 @@ from dashboard_utils import (
     risk_color,
 )
 
-# ------------------------------
-# Page Configuration (FIXED)
-# ------------------------------
+# Page Configuration 
 st.set_page_config(
     page_title="Diabetes Risk Prediction Dashboard",
     layout="wide",
 )
 
-# ------------------------------
+
 # Data Loading
-# ------------------------------
-# This decorator caches the output of this function
 @st.cache_data(show_spinner="Loading and preparing data...")
 def load_all_data():
-    """
-    Loads all necessary CSV files and merges them into a primary dataframe.
-    This logic now prioritizes the feature set and reliably merges predictions onto it.
-    """
     pred_df = load_csv_cached("./test_predictions.csv")
     feat_df = load_csv_cached("./patient_features_with_outcome.csv")
     glucose_df = load_csv_cached("./daily_mean_glucose_with_outcome.csv")
@@ -48,7 +40,6 @@ def load_all_data():
     if feat_df is None and pred_df is None:
         return pd.DataFrame(), pd.DataFrame(), None, None # Return empty objects
 
-    # Harmonize columns before merging
     if pred_df is not None:
         pred_df = harmonize_prediction_frame(pred_df)
     if feat_df is not None:
@@ -68,7 +59,6 @@ def load_all_data():
     if glucose_df is None:
         glucose_df = pd.DataFrame()
 
-    # Load model artifacts inside the cached function
     model, scaler = None, None
     model_path = "./logistic_model.pkl"
     scaler_path = "./scaler.pkl"
@@ -80,27 +70,19 @@ def load_all_data():
             with open(scaler_path, "rb") as f:
                 scaler = pickle.load(f)
     except Exception:
-        # Don't show a warning here, handle it later if explainability is needed
         pass
         
     return merged, glucose_df, model, scaler
 
-# --- Main Data Loading Execution ---
-# This call is now cached and won't trigger warnings on every interaction
+# Main Data Loading 
 merged_df, glucose_df, model, scaler = load_all_data()
 
-# ------------------------------
+
 # UI Header and Sidebar
-# ------------------------------
-# FIXED: Removed the emoji from the title
 st.title("Diabetes Risk Prediction Dashboard")
 st.caption("Displaying patient data and model predictions. Use the sidebar to filter the cohort.")
 
-# FIXED: Removed the "About this dashboard" expander
-# with st.expander("About this dashboard", expanded=False):
-#     st.write(APP_DESCRIPTION)
-
-# --- Sidebar Filters ---
+# Sidebar
 st.sidebar.title("Menu")
 menu = st.sidebar.radio("Navigation", ["Cohort Dashboard", "Model Performance"], label_visibility="collapsed")
 st.sidebar.header("Cohort Filters")
@@ -109,7 +91,6 @@ if merged_df.empty:
     st.warning("No patient data found to display. Please check your CSV files.")
     st.stop()
 
-# --- More robust filter widgets to prevent crashes on empty/NaN data ---
 prob_min_val, prob_max_val = (0.0, 1.0)
 if 'PredictedProbability' in merged_df and merged_df['PredictedProbability'].notna().any():
     prob_min_val = float(merged_df['PredictedProbability'].min())
@@ -138,9 +119,8 @@ filtered_df = filter_cohort(
     merged_df, prob_range[0], prob_range[1], age_range, sex_filter, outcome_filter, ptid_query
 )
 
-# ==================================================================================================
-# MAIN PAGE: COHORT DASHBOARD VIEW
-# ==================================================================================================
+
+# COHORT DASHBOARD VIEW
 if menu == "Cohort Dashboard":
     tab1, tab2 = st.tabs(["Cohort Overview", "Patient Detail View"])
 
@@ -209,9 +189,7 @@ if menu == "Cohort Dashboard":
             else:
                 st.info("No daily glucose data available for this patient.")
 
-# ==================================================================================================
-# MAIN PAGE: MODEL PERFORMANCE VIEW
-# ==================================================================================================
+# MODEL PERFORMANCE VIEW
 if menu == "Model Performance":
     st.subheader("Overall Model Performance Evaluation")
     st.write("These metrics evaluate the model's performance on the **entire unfiltered test set**.")

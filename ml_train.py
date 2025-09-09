@@ -1,5 +1,3 @@
-# train_logistic_model.py
-
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -8,9 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
 import joblib
 
-# ==========================
 # Load dataset
-# ==========================
 df = pd.read_csv("patient_features_with_outcome.csv")
 
 # Encode categorical variable "Sex"

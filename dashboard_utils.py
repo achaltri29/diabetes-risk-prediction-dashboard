@@ -1,6 +1,3 @@
-"""
-Reusable utilities for the AI-Driven Patient Deterioration Risk Dashboard.
-"""
 from __future__ import annotations
 import os
 import pandas as pd
@@ -10,9 +7,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 from typing import Dict, List, Optional, Tuple
 
-# --------------------------
+
 # Data loading and validation
-# --------------------------
 REQUIRED_COLUMNS = [
     "PtID", "Age", "Sex", "Outcome", "PredictedProbability",
 ]
@@ -102,9 +98,8 @@ def filter_cohort(
         data = data[data["PtID"].astype(str).str.lower().str.contains(q)]
     return data
 
-# -----------------
+
 # Metrics & Plots
-# -----------------
 def compute_classification_metrics(y_true: np.ndarray, y_score: np.ndarray, threshold: float = 0.5) -> Dict[str, float]:
     metrics: Dict[str, float] = {}
     try:
@@ -150,9 +145,7 @@ def plot_risk_distribution(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(xaxis_title="Predicted Risk Score", yaxis_title="Number of Patients", margin=dict(l=20, r=20, t=5, b=20))
     return fig
 
-# -----------------
-# Explainability
-# -----------------
+
 def get_linear_model_feature_importances(model, feature_names: List[str]) -> Optional[pd.DataFrame]:
     if model is None or not hasattr(model, "coef_"): return None
     coefs = model.coef_[0] if np.ndim(model.coef_) == 2 else model.coef_
@@ -201,9 +194,7 @@ def plot_patient_contributions(contrib_df: pd.DataFrame) -> go.Figure:
     fig.update_layout(showlegend=False, margin=dict(l=120, r=20, t=5, b=20))
     return fig
 
-# -----------------
 # Daily glucose trends
-# -----------------
 def plot_daily_glucose(df_glucose: pd.DataFrame, ptid: str, hypo: float = 70.0, hyper: float = 180.0) -> Optional[go.Figure]:
     if df_glucose is None or df_glucose.empty or "PtID" not in df_glucose.columns: return None
     g = df_glucose[df_glucose["PtID"].astype(str) == str(ptid)].copy()
@@ -224,9 +215,7 @@ def plot_daily_glucose(df_glucose: pd.DataFrame, ptid: str, hypo: float = 70.0, 
     fig.update_layout(xaxis_title="Time", yaxis_title="Glucose (mg/dL)", margin=dict(l=40, r=20, t=5, b=20))
     return fig
 
-# -----------------
-# Formatting Helpers (FIXED: Re-added missing functions)
-# -----------------
+# Formatting Helpers 
 def get_feature_columns(df: pd.DataFrame) -> List[str]:
     """Return likely feature columns by excluding known metadata columns."""
     non_feature_cols = {"PtID", "Age", "Sex", "Outcome", "PredictedProbability"}
