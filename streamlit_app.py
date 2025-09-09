@@ -93,7 +93,7 @@ merged_df, glucose_df, model, scaler = load_all_data()
 # UI Header and Sidebar
 # ------------------------------
 # FIXED: Removed the emoji from the title
-st.title("AI-Driven Patient Deterioration Risk Dashboard")
+st.title("Diabetes Risk Prediction Dashboard")
 st.caption("Displaying patient data and model predictions. Use the sidebar to filter the cohort.")
 
 # FIXED: Removed the "About this dashboard" expander
